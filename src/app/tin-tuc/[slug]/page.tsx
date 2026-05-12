@@ -33,8 +33,12 @@ export const dynamicParams = true;
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  const news = await getActiveNews();
-  return news.map((n) => ({ slug: n.slug }));
+  try {
+    const news = await getActiveNews();
+    return news.map((n) => ({ slug: n.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
