@@ -25,7 +25,7 @@ export default async function AllProductsPage({
   const currentPage = Number(page) || 1;
 
   const [products, categories] = await Promise.all([
-    getProducts({ page: currentPage, limit: 20, sort: 'category_order' }),
+    getProducts({ page: currentPage, limit: 20, sort: 'category_order' }).catch(() => null),
     getCategories().catch(() => []),
   ]);
   const { items = [], totalPages = 1, total = 0 } = products ?? {};

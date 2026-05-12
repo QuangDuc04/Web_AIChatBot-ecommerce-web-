@@ -21,7 +21,7 @@ function formatDate(d: string | Date) {
 }
 
 export default async function NewsPage() {
-  const news = await getActiveNews();
+  const news = await getActiveNews().catch(() => []);
   const featured = news[0];
 
   return (
