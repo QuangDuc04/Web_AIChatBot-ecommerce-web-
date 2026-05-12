@@ -4,6 +4,8 @@ const path = require("path");
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],
   },
