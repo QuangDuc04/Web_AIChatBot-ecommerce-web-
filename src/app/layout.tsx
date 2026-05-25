@@ -17,11 +17,11 @@ const siteUrl = "https://natro.vn";
 
 export const metadata: Metadata = {
   title: {
-    default: "Halo - Giấy in hóa đơn, Tem decal nhiệt, Máy in đơn hàng",
-    template: "%s | Halo",
+    default: "Duc - Điện Thoại",
+    template: "%s | DUc",
   },
   description:
-    "Halo - Chuyên cung cấp giấy in hóa đơn, tem decal nhiệt, máy in đơn hàng, phần mềm bán hàng. Giá tốt nhất thị trường, giao hàng nhanh 24/7.",
+    "Duc - Chuyên cung cấp thiết bị điện tử, điện thoại,... Giá tốt nhất thị trường, giao hàng nhanh 24/7.",
   keywords: [
     "giấy in hóa đơn",
     "tem decal nhiệt",
@@ -30,14 +30,15 @@ export const metadata: Metadata = {
     "giấy in nhiệt",
     "tem nhãn",
     "Halo",
+    "Duc",
   ],
   metadataBase: new URL(siteUrl),
   openGraph: {
-    title: "Halo - Giấy in hóa đơn, Tem decal nhiệt, Máy in đơn hàng",
+    title: "Duc - Điện Thoại",
     description:
-      "Chuyên cung cấp giấy in hóa đơn, tem decal nhiệt, máy in đơn hàng. Giá tốt nhất, giao hàng nhanh 24/7.",
+      "Chuyên cung cấp thiết bị điện tử, điện thoại,... Giá tốt nhất, giao hàng nhanh 24/7.",
     url: siteUrl,
-    siteName: "Halo",
+    siteName: "Duc",
     locale: "vi_VN",
     type: "website",
   },
@@ -68,12 +69,12 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Store",
-    name: "Halo",
+    name: "Duc",
     description:
-      "Chuyên cung cấp giấy in hóa đơn, tem decal nhiệt, máy in đơn hàng, phần mềm bán hàng.",
+      "Chuyên cung cấp thiết bị điện tử, điện thoại,... Giá tốt nhất, giao hàng nhanh 24/7.",
     url: siteUrl,
-    telephone: "0347.366.345",
-    email: "son.lequang97@gmail.com",
+    telephone: "0353.643.396",
+    email: "lequangduc3275@gmail.com",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Khu phố Chiêu Liêu, Phường Tân Đông Hiệp",
