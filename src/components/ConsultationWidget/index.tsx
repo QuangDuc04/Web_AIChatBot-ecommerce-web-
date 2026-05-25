@@ -58,7 +58,7 @@ function renderBold(text: string, keyPrefix: string) {
 function RichText({ text, isUser }: { text: string; isUser: boolean }) {
   const parts = text.split(URL_REGEX);
   return (
-    <div className="whitespace-pre-wrap">
+    <div className="whitespace-pre-wrap break-words">
       {parts.map((part, i) => {
         if (!URL_REGEX.test(part)) return <span key={i}>{renderBold(part, `p${i}`)}</span>;
 
@@ -351,7 +351,7 @@ export default function ConsultationWidget() {
               >
                 {!isUser && <BotAvatar />}
                 <div
-                  className={`max-w-[75%] px-3 py-2 rounded-2xl text-[14px] leading-relaxed ${
+                  className={`max-w-[75%] min-w-0 overflow-hidden px-3 py-2 rounded-2xl text-[14px] leading-relaxed ${
                     isUser
                       ? "bg-blue-1 text-white rounded-br-sm"
                       : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm"
