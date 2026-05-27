@@ -18,7 +18,7 @@ const siteUrl = "https://natro.vn";
 export const metadata: Metadata = {
   title: {
     default: "Duc - Điện Thoại",
-    template: "%s | DUc",
+    template: "%s | Duc",
   },
   description:
     "Duc - Chuyên cung cấp thiết bị điện tử, điện thoại,... Giá tốt nhất thị trường, giao hàng nhanh 24/7.",
