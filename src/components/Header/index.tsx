@@ -4,8 +4,11 @@ import NavbarMobile from "./NavbarMobile";
 import NavbarTop from "./Navbar/NavbarTop";
 import { getCategories } from "@/lib/api/services/categoryService";
 
+const ALLOWED_SLUGS = ['dien-thoai', 'laptop', 'may-tinh-bang'];
+
 const Header = async () => {
-  const categories = await getCategories().catch(() => []);
+  const allCategories = await getCategories().catch(() => []);
+  const categories = allCategories.filter(c => ALLOWED_SLUGS.includes(c.slug));
 
   return (
     <>
