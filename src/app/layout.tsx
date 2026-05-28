@@ -17,7 +17,7 @@ const siteUrl = "https://natro.vn";
 
 export const metadata: Metadata = {
   title: {
-    default: "Duc - Điện Thoại",
+    default: "Duc Store",
     template: "%s | Duc",
   },
   description:
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   ],
   metadataBase: new URL(siteUrl),
   openGraph: {
-    title: "Duc - Điện Thoại",
+    title: "Duc Store",
     description:
       "Chuyên cung cấp thiết bị điện tử, điện thoại,... Giá tốt nhất, giao hàng nhanh 24/7.",
     url: siteUrl,

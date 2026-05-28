@@ -28,19 +28,15 @@ function SectionSkeleton() {
 
 export default async function Home() {
   // Only fetch critical above-fold data — rest streams via Suspense
-  const ALLOWED_SLUGS = ['dien-thoai', 'laptop', 'may-tinh-bang'];
-
   const [categories, banners] = await Promise.all([
     getCategories().catch((): Category[] => []),
     getActiveBanners().catch((): Banner[] => []),
   ]);
 
-  const filteredCategories = categories.filter(c => ALLOWED_SLUGS.includes(c.slug));
-
   return (
     <main className="container space-y-6 sm:space-y-8 pb-8">
       <HeroSection
-        categories={filteredCategories}
+        categories={categories}
         featuredProducts={[]}
         banners={banners}
       />
@@ -48,7 +44,7 @@ export default async function Home() {
         <WelcomeSection />
       </AnimateOnScroll>
       <Suspense fallback={<SectionSkeleton />}>
-        <FlashSaleWrapper categories={filteredCategories} />
+        <FlashSaleWrapper categories={categories} />
       </Suspense>
       <AnimateOnScroll animation="fade-up">
         <WhyChooseUs />
