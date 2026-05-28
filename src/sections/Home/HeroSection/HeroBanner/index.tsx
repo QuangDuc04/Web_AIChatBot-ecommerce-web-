@@ -24,42 +24,40 @@ function HeroBanner({ banners }: IHeroBanner) {
   }));
 
   return (
-    <div className="relative w-full aspect-[16/5]">
-      <Swiper
-        className="absolute inset-0 hero-swiper"
-        modules={[Pagination, A11y, Autoplay, EffectFade]}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        autoplay={{ delay: 4000, disableOnInteraction: false }}
-        pagination={{
-          clickable: true,
-          bulletClass: "hero-bullet",
-          bulletActiveClass: "hero-bullet-active",
-        }}
-        loop
-        speed={1200}
-      >
-        {slides.map((slide, i) => (
-          <SwiperSlide key={slide.id}>
-            <Link href={slide.link} className="block w-full h-full">
-              <div className="relative w-full h-full bg-gray-100">
-                <Image
-                  src={slide.image}
-                  alt={slide.alt}
-                  fill
-                  priority={i === 0}
-                  className="object-contain hero-ken-burns"
-                  sizes="100vw"
-                />
-              </div>
-            </Link>
-          </SwiperSlide>
-        ))}
+    <Swiper
+      className="w-full hero-swiper"
+      modules={[Pagination, A11y, Autoplay, EffectFade]}
+      effect="fade"
+      fadeEffect={{ crossFade: true }}
+      autoplay={{ delay: 4000, disableOnInteraction: false }}
+      pagination={{
+        clickable: true,
+        bulletClass: "hero-bullet",
+        bulletActiveClass: "hero-bullet-active",
+      }}
+      loop
+      speed={1200}
+    >
+      {slides.map((slide, i) => (
+        <SwiperSlide key={slide.id}>
+          <Link href={slide.link}>
+            <div className="relative w-full xl:h-[480px] md:h-[400px] sm:h-[320px] h-[240px] overflow-hidden bg-gray-50">
+              <Image
+                src={slide.image}
+                alt={slide.alt}
+                fill
+                priority={i === 0}
+                className="object-contain hero-ken-burns"
+                sizes="100vw"
+              />
+            </div>
+          </Link>
+        </SwiperSlide>
+      ))}
 
-        {/* Bottom gradient for pagination contrast */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/25 to-transparent z-[5] pointer-events-none" />
-      </Swiper>
-    </div>
+      {/* Bottom gradient for pagination contrast */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/25 to-transparent z-[5] pointer-events-none" />
+    </Swiper>
   );
 }
 
