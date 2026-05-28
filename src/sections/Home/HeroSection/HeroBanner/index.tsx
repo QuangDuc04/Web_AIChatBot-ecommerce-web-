@@ -41,7 +41,7 @@ function HeroBanner({ banners }: IHeroBanner) {
       {slides.map((slide, i) => (
         <SwiperSlide key={slide.id}>
           <Link href={slide.link}>
-            <div className="relative w-full xl:h-[480px] md:h-[400px] sm:h-[320px] h-[240px] overflow-hidden">
+            <div className="relative w-full aspect-[16/5] overflow-hidden">
               <Image
                 src={slide.image}
                 alt={slide.alt}
