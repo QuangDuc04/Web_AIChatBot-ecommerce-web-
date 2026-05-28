@@ -27,19 +27,19 @@ const HeroSection = ({ categories, banners }: IHeroSection) => {
         />
       )}
 
-      {/* Hero area — banner full width with sidebar overlay on desktop */}
+      {/* Hero area — sidebar + banner side-by-side on desktop, banner-only on mobile/tablet */}
       <div
-        className="relative rounded-2xl overflow-hidden"
+        className="flex rounded-2xl overflow-hidden bg-white"
         style={{ boxShadow: "0 6px 32px rgba(0,0,0,0.08)" }}
       >
-        {/* Banner — full width */}
-        <HeroBanner banners={banners} />
+        {/* Sidebar categories — fixed width on desktop, hidden on smaller screens */}
+        <div className="hidden @5xl:block w-[260px] shrink-0 border-r border-gray-100">
+          <Categories categories={categories} />
+        </div>
 
-        {/* Sidebar categories — glassmorphism overlay on desktop */}
-        <div className="absolute inset-y-0 left-0 w-[260px] @5xl:block hidden z-10">
-          <div className="h-full bg-white/[0.97] backdrop-blur-xl shadow-[4px_0_20px_rgba(0,0,0,0.05)]">
-            <Categories categories={categories} />
-          </div>
+        {/* Banner — takes remaining width */}
+        <div className="flex-1 min-w-0">
+          <HeroBanner banners={banners} />
         </div>
       </div>
 
