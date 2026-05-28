@@ -229,12 +229,13 @@ export default function ConsultationWidget() {
         const res = await sendChatbotMessage(text, abort.signal);
         if (abort.signal.aborted) return;
         appendAssistant(res.reply, "b");
-      } catch {
+      } catch (err: unknown) {
         if (abort.signal.aborted) return;
-        appendAssistant(
-          "Xin lỗi, hệ thống đang tìm kiếm thông tin. Vui lòng thử lại sau hoặc liên hệ hotline 0347.366.345.",
-          "e",
-        );
+        const msg =
+          err instanceof Error && err.message
+            ? err.message
+            : "Xin lỗi, hệ thống đang tìm kiếm thông tin. Vui lòng thử lại sau hoặc liên hệ hotline 0347.366.345.";
+        appendAssistant(msg, "e");
       } finally {
         if (!abort.signal.aborted) setIsLoading(false);
         abortRef.current = null;
