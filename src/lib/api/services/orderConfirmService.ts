@@ -1,5 +1,11 @@
 import { apiGet, apiPost } from '@/lib/api/client';
 
+export interface BankInfo {
+  bankCode: string;
+  accountNumber: string;
+  accountName: string;
+}
+
 export interface ConfirmationData {
   customerName: string;
   customerPhone: string;
@@ -23,6 +29,7 @@ export interface ConfirmationData {
   shippingFee: number;
   total: number;
   expiresAt: string;
+  bankInfo: BankInfo;
 }
 
 export interface ConfirmResult {
@@ -33,5 +40,5 @@ export interface ConfirmResult {
 export const getConfirmation = (token: string): Promise<ConfirmationData> =>
   apiGet<ConfirmationData>(`/order-confirm/${token}`);
 
-export const confirmOrder = (token: string): Promise<ConfirmResult> =>
-  apiPost<ConfirmResult>(`/order-confirm/${token}/confirm`);
+export const confirmOrder = (token: string, paymentMethod: string): Promise<ConfirmResult> =>
+  apiPost<ConfirmResult>(`/order-confirm/${token}/confirm`, { paymentMethod });

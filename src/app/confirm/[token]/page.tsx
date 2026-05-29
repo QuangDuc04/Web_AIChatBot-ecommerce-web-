@@ -12,6 +12,10 @@ import {
   Loader2,
   AlertTriangle,
   ShoppingBag,
+  Truck,
+  QrCode,
+  Copy,
+  Check,
 } from "lucide-react";
 import { app } from "@/config/constants";
 import {
@@ -32,6 +36,18 @@ function formatTimeRemaining(expiresAt: string) {
   return `${mins} phút ${secs} giây`;
 }
 
+function buildVietQRUrl(
+  bankCode: string,
+  accountNumber: string,
+  accountName: string,
+  amount: number,
+  content: string,
+) {
+  const encoded = encodeURIComponent(content);
+  const encodedName = encodeURIComponent(accountName);
+  return `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.jpg?amount=${amount}&addInfo=${encoded}&accountName=${encodedName}`;
+}
+
 export default function ConfirmPage() {
   const params = useParams();
   const router = useRouter();
@@ -44,8 +60,11 @@ export default function ConfirmPage() {
   const [confirmed, setConfirmed] = useState<{
     orderId: string;
     orderNumber: string;
+    paymentMethod: string;
   } | null>(null);
   const [timeLeft, setTimeLeft] = useState("");
+  const [selectedPayment, setSelectedPayment] = useState<"cod" | "bank_transfer">("cod");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Load confirmation data
   useEffect(() => {
@@ -77,12 +96,20 @@ export default function ConfirmPage() {
     return () => clearInterval(interval);
   }, [data]);
 
+  const copyToClipboard = useCallback(async (text: string, field: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch {}
+  }, []);
+
   const handleConfirm = useCallback(async () => {
     if (!token || confirming) return;
     setConfirming(true);
     try {
-      const result = await confirmOrder(token);
-      setConfirmed(result);
+      const result = await confirmOrder(token, selectedPayment);
+      setConfirmed({ ...result, paymentMethod: selectedPayment });
 
       // Notify chatbot widget in other tab via BroadcastChannel
       try {
@@ -90,7 +117,7 @@ export default function ConfirmPage() {
         channel.postMessage({
           type: "order_confirmed",
           orderNumber: result.orderNumber,
-          message: `Đơn hàng #${result.orderNumber} đã được xác nhận thành công! Cảm ơn anh/chị đã đặt hàng tại Halo. Đơn hàng sẽ được xử lý và giao đến anh/chị trong thời gian sớm nhất. Mọi thắc mắc hoặc thay đổi đơn hàng, vui lòng liên hệ hotline 0347.366.345.`,
+          message: `Đơn hàng #${result.orderNumber} đã được xác nhận thành công! Cảm ơn anh/chị đã đặt hàng tại ${app.shopName}. Đơn hàng sẽ được xử lý và giao đến anh/chị trong thời gian sớm nhất. Mọi thắc mắc hoặc thay đổi đơn hàng, vui lòng liên hệ hotline 0347.366.345.`,
         });
         channel.close();
       } catch {}
@@ -99,7 +126,7 @@ export default function ConfirmPage() {
     } finally {
       setConfirming(false);
     }
-  }, [token, confirming]);
+  }, [token, confirming, selectedPayment]);
 
   // Loading state
   if (loading) {
@@ -138,34 +165,58 @@ export default function ConfirmPage() {
 
   // Success state
   if (confirmed) {
+    const isBankTransfer = confirmed.paymentMethod === "bank_transfer";
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#eef6f5] px-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-            <CheckCircle size={32} className="text-green-600" />
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${isBankTransfer ? "bg-indigo-100" : "bg-green-100"}`}>
+            <CheckCircle size={32} className={isBankTransfer ? "text-indigo-600" : "text-green-600"} />
           </div>
           <h1 className="text-xl font-bold text-gray-800">
-            Đặt hàng thành công!
+            {isBankTransfer ? "Đơn hàng đã ghi nhận!" : "Đặt hàng thành công!"}
           </h1>
           <p className="text-gray-500">
             Mã đơn hàng:{" "}
-            <span className="font-bold text-blue-1">
+            <span className={`font-bold ${isBankTransfer ? "text-indigo-600" : "text-blue-1"}`}>
               {confirmed.orderNumber}
             </span>
           </p>
           <div className="text-[14px] text-gray-500 space-y-2 text-left bg-gray-50 rounded-xl p-4">
-            <p>Cảm ơn anh/chị đã tin tưởng đặt hàng tại <span className="font-semibold text-blue-1">{app.shopName}</span>!</p>
-            <p>Đơn hàng sẽ được xử lý và giao đến anh/chị trong thời gian sớm nhất.</p>
-            <p>Mọi thắc mắc về đơn hàng, vui lòng liên hệ:</p>
-            <p className="font-semibold">
-              <a href={`tel:${app.phones?.[0]}`} className="text-blue-1 hover:underline">
+            {isBankTransfer ? (
+              <>
+                <p>Chúng tôi sẽ xác nhận đơn hàng ngay sau khi nhận được thanh toán.</p>
+                <p>
+                  Nếu đã chuyển khoản, vui lòng chờ{" "}
+                  <span className="font-semibold">5–15 phút</span> để bộ phận
+                  kế toán xác nhận.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  Cảm ơn anh/chị đã tin tưởng đặt hàng tại{" "}
+                  <span className="font-semibold text-blue-1">{app.shopName}</span>!
+                </p>
+                <p>Đơn hàng sẽ được xử lý và giao đến anh/chị trong thời gian sớm nhất.</p>
+              </>
+            )}
+            <p>
+              Mọi thắc mắc, vui lòng liên hệ:{" "}
+              <a
+                href={`tel:${app.phones?.[0]}`}
+                className="font-semibold text-blue-1 hover:underline"
+              >
                 {app.phones?.[0]}
               </a>
             </p>
           </div>
           <button
             onClick={() => router.push("/")}
-            className="px-6 py-2.5 bg-blue-1 text-white rounded-xl font-semibold hover:bg-[#18958e] transition-colors"
+            className={`px-6 py-2.5 text-white rounded-xl font-semibold transition-colors ${
+              isBankTransfer
+                ? "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-blue-1 hover:bg-[#18958e]"
+            }`}
           >
             Về trang chủ
           </button>
@@ -176,7 +227,18 @@ export default function ConfirmPage() {
 
   if (!data) return null;
 
-  // Confirmation form
+  const transferContent = `DUC STORE ${token.slice(0, 8).toUpperCase()}`;
+  const qrUrl =
+    data.bankInfo?.accountNumber
+      ? buildVietQRUrl(
+          data.bankInfo.bankCode,
+          data.bankInfo.accountNumber,
+          data.bankInfo.accountName,
+          data.total,
+          transferContent,
+        )
+      : null;
+
   return (
     <div className="min-h-screen bg-[#eef6f5] py-8 px-4">
       <div className="max-w-lg mx-auto space-y-4">
@@ -279,7 +341,9 @@ export default function ConfirmPage() {
           <div className="flex justify-between text-[14px] text-gray-600">
             <span>Phí vận chuyển</span>
             <span>
-              {data.shippingFee > 0 ? formatPrice(data.shippingFee) : "Miễn phí"}
+              {data.shippingFee > 0
+                ? formatPrice(data.shippingFee)
+                : "Miễn phí"}
             </span>
           </div>
           <div className="border-t border-gray-200 pt-2 flex justify-between">
@@ -292,28 +356,160 @@ export default function ConfirmPage() {
           </div>
         </div>
 
-        {/* Confirm button */}
+        {/* Payment method selector */}
+        <div className="bg-white rounded-2xl shadow-lg p-5 space-y-3">
+          <h2 className="text-[15px] font-bold text-gray-800">
+            Phương thức thanh toán
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {/* COD */}
+            <button
+              onClick={() => setSelectedPayment("cod")}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                selectedPayment === "cod"
+                  ? "border-blue-1 bg-blue-1/5"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <Truck
+                size={28}
+                className={
+                  selectedPayment === "cod" ? "text-blue-1" : "text-gray-400"
+                }
+              />
+              <span
+                className={`text-[13px] font-semibold text-center leading-tight ${
+                  selectedPayment === "cod" ? "text-blue-1" : "text-gray-600"
+                }`}
+              >
+                Thanh toán khi nhận hàng
+              </span>
+            </button>
+
+            {/* Bank transfer */}
+            <button
+              onClick={() => setSelectedPayment("bank_transfer")}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                selectedPayment === "bank_transfer"
+                  ? "border-indigo-500 bg-indigo-50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <QrCode
+                size={28}
+                className={
+                  selectedPayment === "bank_transfer"
+                    ? "text-indigo-600"
+                    : "text-gray-400"
+                }
+              />
+              <span
+                className={`text-[13px] font-semibold text-center leading-tight ${
+                  selectedPayment === "bank_transfer"
+                    ? "text-indigo-600"
+                    : "text-gray-600"
+                }`}
+              >
+                Chuyển khoản ngân hàng
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* VietQR block */}
+        {selectedPayment === "bank_transfer" && data.bankInfo && (
+          <div className="bg-white rounded-2xl shadow-lg p-5 space-y-4">
+            <h2 className="text-[15px] font-bold text-gray-800">
+              Thông tin chuyển khoản
+            </h2>
+
+            {/* QR code */}
+            {qrUrl && (
+              <div className="flex justify-center">
+                <img
+                  src={qrUrl}
+                  alt="QR Chuyển khoản"
+                  className="w-52 h-52 rounded-xl border border-gray-200 object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Bank info rows */}
+            <div className="space-y-2 text-[14px]">
+              {[
+                { label: "Ngân hàng", value: `${data.bankInfo.bankCode} Bank` },
+                { label: "Số tài khoản", value: data.bankInfo.accountNumber },
+                { label: "Chủ tài khoản", value: data.bankInfo.accountName },
+                { label: "Số tiền", value: formatPrice(data.total) },
+                { label: "Nội dung CK", value: transferContent },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-100 last:border-0"
+                >
+                  <span className="text-gray-500 flex-shrink-0">{label}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-semibold text-gray-800 truncate">
+                      {value}
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard(value, label)}
+                      className="flex-shrink-0 p-1 rounded hover:bg-gray-100 transition-colors"
+                      title="Sao chép"
+                    >
+                      {copiedField === label ? (
+                        <Check size={14} className="text-green-500" />
+                      ) : (
+                        <Copy size={14} className="text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-[12px] text-amber-600 bg-amber-50 rounded-lg p-3">
+              Vui lòng chuyển khoản đúng <strong>số tiền</strong> và{" "}
+              <strong>nội dung</strong> để đơn hàng được xác nhận nhanh nhất.
+            </p>
+          </div>
+        )}
+
+        {/* Error banner */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
             <p className="text-[14px] text-red-600">{error}</p>
           </div>
         )}
 
+        {/* Confirm button */}
         <button
           onClick={handleConfirm}
           disabled={confirming}
-          className="w-full py-3.5 bg-blue-1 text-white text-[16px] font-bold rounded-2xl hover:bg-[#18958e] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+          className={`w-full py-3.5 text-white text-[16px] font-bold rounded-2xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${
+            selectedPayment === "bank_transfer"
+              ? "bg-indigo-600 hover:bg-indigo-700"
+              : "bg-blue-1 hover:bg-[#18958e]"
+          }`}
         >
           {confirming ? (
             <Loader2 size={20} className="animate-spin" />
           ) : (
             <CheckCircle size={20} />
           )}
-          {confirming ? "Đang xử lý..." : "XÁC NHẬN ĐẶT HÀNG"}
+          {confirming
+            ? "Đang xử lý..."
+            : selectedPayment === "bank_transfer"
+            ? "TÔI ĐÃ CHUYỂN KHOẢN"
+            : "XÁC NHẬN ĐẶT HÀNG"}
         </button>
 
         <p className="text-center text-[13px] text-gray-400">
-          Bằng việc xác nhận, bạn đồng ý với điều khoản sử dụng của {app.shopName}
+          Bằng việc xác nhận, bạn đồng ý với điều khoản sử dụng của{" "}
+          {app.shopName}
         </p>
       </div>
     </div>
